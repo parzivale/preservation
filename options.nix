@@ -418,7 +418,7 @@ let
         };
         homeMode = lib.mkOption {
           type = lib.types.str;
-          default = config.users.users.${attrs.config.username}.homeMode;
+          default = "0700";
           internal = true;
           readOnly = true;
         };

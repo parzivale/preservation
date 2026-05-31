@@ -1,15 +1,6 @@
 { lib, ... }:
 
 rec {
-  # converts a list of `mountOption` to a comma-separated string that is passed to the mount unit
-  toOptionsString =
-    mountOptions:
-    builtins.concatStringsSep "," (
-      map (
-        option: if option.value == null then option.name else "${option.name}=${option.value}"
-      ) mountOptions
-    );
-
   # concatenates two paths
   # inserts a "/" in between if there is none, removes one if there are two
   concatTwoPaths =
@@ -59,11 +50,9 @@ rec {
   parentSegments =
     path:
     let
-      # collect all path segments, including the given path itself
       includingPath = builtins.foldl' (
         acc: part: if acc == [ ] then [ part ] else ([ (concatTwoPaths (builtins.head acc) part) ] ++ acc)
       ) [ ] (parts path);
-      # return all path segments except for the given path
     in
     builtins.tail includingPath;
 
@@ -76,10 +65,6 @@ rec {
     lib.lists.unique (builtins.filter (path: !(builtins.elem path paths)) intermediates);
 
   # generates a list of attributes to be used in the `directories` option of the `userModule`
-  #
-  # essentially this takes the given lists of configurations for `directories` and `files`,
-  # generates a list of all their unique parent paths and returns a single list of the
-  # given configurations extended by the configurations for their parents, using `defaults`
   mkIntermediateUserDirectories =
     defaults: files: prefix: directories:
     let
@@ -90,37 +75,24 @@ rec {
       intermediateInitrdPaths = missingIntermediatePaths (toPaths partitions.right);
       intermediateRegularPaths = missingIntermediatePaths (toPaths partitions.wrong);
       initrdIntermediates = map (
-        p:
-        defaults
-        // {
-          inInitrd = true;
-          directory = p;
-        }
+        p: defaults // { inInitrd = true; directory = p; }
       ) intermediateInitrdPaths;
       regularIntermediates = map (
-        p:
-        defaults
-        // {
-          inInitrd = false;
-          directory = p;
-        }
+        p: defaults // { inInitrd = false; directory = p; }
       ) intermediateRegularPaths;
     in
     directories ++ initrdIntermediates ++ regularIntermediates;
 
-  # retrieves the list of directories for all users in a `userModule`
   getUserDirectories = lib.mapAttrsToList (_: userConfig: userConfig.directories);
-  # retrieves the list of files for all users in a `userModule`
   getUserFiles = lib.mapAttrsToList (_: userConfig: userConfig.files);
-  # retrieves all directories configured in a `preserveAtSubmodule`
+
   getAllDirectories =
     stateConfig:
     stateConfig.directories ++ (builtins.concatLists (getUserDirectories stateConfig.users));
-  # retrieves all files configured in a `preserveAtSubmodule`
+
   getAllFiles =
     stateConfig: stateConfig.files ++ (builtins.concatLists (getUserFiles stateConfig.users));
-  # retrieves the list of user configs that preserve any file or directory for all
-  # users in a `preserveAtSubmodule`
+
   getNonEmptyUserConfigs =
     forInitrd: stateConfig:
     let
@@ -129,348 +101,224 @@ rec {
       nonEmptyUsers = lib.filterAttrs (_: preservesAny) stateConfig.users;
     in
     lib.mapAttrsToList (_: userConfig: userConfig) nonEmptyUsers;
-  # filters a list of files or directories, returns only bindmounts
+
   onlyBindMounts =
     forInitrd: builtins.filter (conf: conf.how == "bindmount" && conf.inInitrd == forInitrd);
-  # filters a list of files or directories, returns only symlinks
   onlySymLinks =
     forInitrd: builtins.filter (conf: conf.how == "symlink" && conf.inInitrd == forInitrd);
-  # filters a list of files or directories, returns only intermediate paths
   onlyIntermediates =
     forInitrd: builtins.filter (conf: conf.how == "_intermediate" && conf.inInitrd == forInitrd);
 
-  # creates tmpfiles.d rules for the `settings` option of the tmpfiles module from a `preserveAtSubmodule`
-  mkTmpfilesRules =
-    forInitrd: preserveAt: stateConfig:
+  # returns all non-empty user configs regardless of inInitrd flag
+  getAllNonEmptyUserConfigs =
+    stateConfig:
+    lib.mapAttrsToList (_: u: u) (
+      lib.filterAttrs (_: u: (u.files ++ u.directories) != [ ]) stateConfig.users
+    );
+
+  # produces shell commands for all bind mounts to run in the initrd after mount-all.
+  # doing everything here means bind mounts persist through switch_root, so all paths are
+  # available from the very start of stage 2.
+  mkFinitInitrdMountCmds =
+    _preserveAt: stateConfig:
     let
       allDirectories = getAllDirectories stateConfig;
       allFiles = getAllFiles stateConfig;
-      nonEmptyUserConfigs = getNonEmptyUserConfigs forInitrd stateConfig;
-      mountedDirectories = onlyBindMounts forInitrd allDirectories;
-      intermediateDirectories = onlyIntermediates forInitrd allDirectories;
-      mountedFiles = onlyBindMounts forInitrd allFiles;
-      symlinkedDirectories = onlySymLinks forInitrd allDirectories;
-      symlinkedFiles = onlySymLinks forInitrd allFiles;
+      initrdDirectories = builtins.filter (d: d.how == "bindmount") allDirectories;
+      initrdFiles = builtins.filter (f: f.how == "bindmount") allFiles;
 
-      prefix = if forInitrd then "/sysroot" else "/";
+      prefix = "/sysroot";
 
-      # directories that are bind-mounted from the persistent prefix
-      mountedDirRules = map (
+      dirCmds = lib.concatMap (
         dirConfig:
         let
-          persistentDirPath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            dirConfig.directory
-          ];
-          volatileDirPath = concatPaths [
-            prefix
-            dirConfig.directory
-          ];
+          persistentPath = concatPaths [ prefix stateConfig.persistentStoragePath dirConfig.directory ];
+          volatilePath = concatPaths [ prefix dirConfig.directory ];
         in
-        {
-          # directory on persistent storage
-          "${persistentDirPath}".d = {
-            inherit (dirConfig) user group mode;
-          };
-          # directory on volatile storage
-          "${volatileDirPath}".d = {
-            inherit (dirConfig) user group mode;
-          };
-        }
-        // lib.optionalAttrs dirConfig.configureParent {
-          # parent directory of directory on persistent storage
-          "${parentDirectory persistentDirPath}".d = {
-            inherit (dirConfig.parent) user group mode;
-          };
-          # parent directory of symlink on volatile storage
-          "${parentDirectory volatileDirPath}".d = {
-            inherit (dirConfig.parent) user group mode;
-          };
-        }
+        [
+          "mkdir -p ${persistentPath}"
+          "mkdir -p ${volatilePath}"
+          "mount --bind ${persistentPath} ${volatilePath}"
+        ]
+      ) initrdDirectories;
+
+      fileCmds = lib.concatMap (
+        fileConfig:
+        let
+          persistentPath = concatPaths [ prefix stateConfig.persistentStoragePath fileConfig.file ];
+          volatilePath = concatPaths [ prefix fileConfig.file ];
+        in
+        [
+          "mkdir -p ${parentDirectory persistentPath}"
+          "mkdir -p ${parentDirectory volatilePath}"
+          "touch ${persistentPath}"
+          "touch ${volatilePath}"
+          "mount --bind ${persistentPath} ${volatilePath}"
+        ]
+      ) initrdFiles;
+    in
+    dirCmds ++ fileCmds;
+
+  # produces tmpfiles.d(5) text lines for inInitrd=false paths, for the regular (stage-2) system.
+  # bootmisc processes these before any run [S] commands, so directories exist by the time
+  # mkFinitRegularMountRuns bind-mounts them.
+  mkFinitRegularTmpfilesRules =
+    _preserveAt: stateConfig:
+    let
+      allDirectories = getAllDirectories stateConfig;
+      allFiles = getAllFiles stateConfig;
+      mountedDirectories = onlyBindMounts false allDirectories;
+      intermediateDirectories = onlyIntermediates false allDirectories;
+      mountedFiles = onlyBindMounts false allFiles;
+      symlinkedDirectories = onlySymLinks false allDirectories;
+      symlinkedFiles = onlySymLinks false allFiles;
+      nonEmptyUserConfigs = getNonEmptyUserConfigs false stateConfig;
+
+      mkDir = path: user: group: mode: "d ${path} ${mode} ${user} ${group} - -";
+      mkFile = path: user: group: mode: "f ${path} ${mode} ${user} ${group} - -";
+      mkSymlink = path: target: "L ${path} - - - - ${target}";
+
+      mountedDirRules = lib.concatMap (
+        dirConfig:
+        let
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath dirConfig.directory ];
+          volatilePath = dirConfig.directory;
+        in
+        [
+          (mkDir persistentPath dirConfig.user dirConfig.group dirConfig.mode)
+          (mkDir volatilePath dirConfig.user dirConfig.group dirConfig.mode)
+        ]
+        ++ lib.optionals dirConfig.configureParent [
+          (mkDir (parentDirectory persistentPath) dirConfig.parent.user dirConfig.parent.group dirConfig.parent.mode)
+          (mkDir (parentDirectory volatilePath) dirConfig.parent.user dirConfig.parent.group dirConfig.parent.mode)
+        ]
       ) mountedDirectories;
 
-      # directories that are not persisted themselves
-      intermediateDirRules = map (
+      intermediateDirRules = lib.concatMap (
         dirConfig:
         let
-          persistentDirPath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            dirConfig.directory
-          ];
-          volatileDirPath = concatPaths [
-            prefix
-            dirConfig.directory
-          ];
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath dirConfig.directory ];
+          volatilePath = dirConfig.directory;
         in
-        {
-          # directory on persistent storage
-          "${persistentDirPath}".d = {
-            inherit (dirConfig) user group mode;
-          };
-          # directory on volatile storage
-          "${volatileDirPath}".d = {
-            inherit (dirConfig) user group mode;
-          };
-        }
+        [
+          (mkDir persistentPath dirConfig.user dirConfig.group dirConfig.mode)
+          (mkDir volatilePath dirConfig.user dirConfig.group dirConfig.mode)
+        ]
       ) intermediateDirectories;
 
-      # home directories that are not persisted themselves but require
-      # user-specific ownership and permissions on the persistent prefix
       intermediateHomeRules = map (
         userConfig:
-        let
-          persistentDirPath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            userConfig.home
-          ];
-        in
-        {
-          "${persistentDirPath}".d = {
-            user = userConfig.username;
-            group = userConfig.homeGroup;
-            mode = userConfig.homeMode;
-          };
-        }
-
+        mkDir (concatPaths [ stateConfig.persistentStoragePath userConfig.home ]) userConfig.username userConfig.homeGroup userConfig.homeMode
       ) nonEmptyUserConfigs;
 
-      # files that are bind-mounted from the persistent prefix
-      mountedFileRules = map (
+      # intermediate parent directories on the persistent side that aren't created by anything else
+      # (the volatile side is handled by finix's own tmpfiles; user home dirs by intermediateHomeRules)
+      handledPersistentPaths = map (u: lib.removePrefix "/" u.home) nonEmptyUserConfigs;
+      allPersistentLeafPaths =
+        (map (d: d.directory) (mountedDirectories ++ intermediateDirectories))
+        ++ (map (f: f.file) mountedFiles);
+      intermediatePersistentPaths = builtins.filter
+        (p: !(builtins.elem p handledPersistentPaths))
+        (missingIntermediatePaths allPersistentLeafPaths);
+      intermediatePersistentRules = map (
+        path: mkDir (concatPaths [ stateConfig.persistentStoragePath path ]) "root" "root" "0755"
+      ) intermediatePersistentPaths;
+
+      mountedFileRules = lib.concatMap (
         fileConfig:
         let
-          persistentFilePath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            fileConfig.file
-          ];
-          volatileFilePath = concatPaths [
-            prefix
-            fileConfig.file
-          ];
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath fileConfig.file ];
+          volatilePath = fileConfig.file;
         in
-        {
-          # file on persistent storage
-          "${concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            fileConfig.file
-          ]}".f =
-            {
-              inherit (fileConfig) user group mode;
-            };
-          # file on volatile storage
-          "${concatPaths [
-            prefix
-            fileConfig.file
-          ]}".f =
-            {
-              inherit (fileConfig) user group mode;
-            };
-        }
-        // lib.optionalAttrs fileConfig.configureParent {
-          # parent directory of file on persistent storage
-          "${parentDirectory persistentFilePath}".d = {
-            inherit (fileConfig.parent) user group mode;
-          };
-          # parent directory of symlink on volatile storage
-          "${parentDirectory volatileFilePath}".d = {
-            inherit (fileConfig.parent) user group mode;
-          };
-        }
+        [
+          (mkFile persistentPath fileConfig.user fileConfig.group fileConfig.mode)
+          (mkFile volatilePath fileConfig.user fileConfig.group fileConfig.mode)
+        ]
+        ++ lib.optionals fileConfig.configureParent [
+          (mkDir (parentDirectory persistentPath) fileConfig.parent.user fileConfig.parent.group fileConfig.parent.mode)
+          (mkDir (parentDirectory volatilePath) fileConfig.parent.user fileConfig.parent.group fileConfig.parent.mode)
+        ]
       ) mountedFiles;
 
-      # directories are linked to from the volatile prefix
-      symlinkedDirRules = map (
+      symlinkedDirRules = lib.concatMap (
         dirConfig:
         let
-          persistentDirPath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            dirConfig.directory
-          ];
-          volatileDirPath = concatPaths [
-            prefix
-            dirConfig.directory
-          ];
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath dirConfig.directory ];
+          volatilePath = dirConfig.directory;
+          target = concatPaths [ stateConfig.persistentStoragePath dirConfig.directory ];
         in
-        {
-          # symlink on volatile storage
-          "${volatileDirPath}".L = {
-            inherit (dirConfig) user group mode;
-            argument = concatPaths [
-              stateConfig.persistentStoragePath
-              dirConfig.directory
-            ];
-          };
-        }
-        // lib.optionalAttrs dirConfig.createLinkTarget {
-          # directory on persistent storage
-          "${persistentDirPath}".d = {
-            inherit (dirConfig) user group mode;
-          };
-        }
-        // lib.optionalAttrs dirConfig.configureParent {
-          # parent directory of directory on persistent storage
-          "${parentDirectory persistentDirPath}".d = {
-            inherit (dirConfig.parent) user group mode;
-          };
-          # parent directory of symlink on volatile storage
-          "${parentDirectory volatileDirPath}".d = {
-            inherit (dirConfig.parent) user group mode;
-          };
-        }
+        [ (mkSymlink volatilePath target) ]
+        ++ lib.optionals dirConfig.createLinkTarget [
+          (mkDir persistentPath dirConfig.user dirConfig.group dirConfig.mode)
+        ]
+        ++ lib.optionals dirConfig.configureParent [
+          (mkDir (parentDirectory persistentPath) dirConfig.parent.user dirConfig.parent.group dirConfig.parent.mode)
+          (mkDir (parentDirectory volatilePath) dirConfig.parent.user dirConfig.parent.group dirConfig.parent.mode)
+        ]
       ) symlinkedDirectories;
 
-      # files are linked to from the volatile prefix
-      symlinkedFileRules = map (
+      symlinkedFileRules = lib.concatMap (
         fileConfig:
         let
-          persistentFilePath = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            fileConfig.file
-          ];
-          volatileFilePath = concatPaths [
-            prefix
-            fileConfig.file
-          ];
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath fileConfig.file ];
+          volatilePath = fileConfig.file;
+          target = concatPaths [ stateConfig.persistentStoragePath fileConfig.file ];
         in
-        {
-          # symlink on volatile storage
-          "${volatileFilePath}".L = {
-            inherit (fileConfig) user group mode;
-            argument = concatPaths [
-              stateConfig.persistentStoragePath
-              fileConfig.file
-            ];
-          };
-        }
-        // lib.optionalAttrs fileConfig.createLinkTarget {
-          # file on persistent storage
-          "${persistentFilePath}".f = {
-            inherit (fileConfig) user group mode;
-          };
-        }
-        // lib.optionalAttrs fileConfig.configureParent {
-          # parent directory of file on persistent storage
-          "${parentDirectory persistentFilePath}".d = {
-            inherit (fileConfig.parent) user group mode;
-          };
-          # parent directory of symlink on volatile storage
-          "${parentDirectory volatileFilePath}".d = {
-            inherit (fileConfig.parent) user group mode;
-          };
-        }
+        [ (mkSymlink volatilePath target) ]
+        ++ lib.optionals fileConfig.createLinkTarget [
+          (mkFile persistentPath fileConfig.user fileConfig.group fileConfig.mode)
+        ]
+        ++ lib.optionals fileConfig.configureParent [
+          (mkDir (parentDirectory persistentPath) fileConfig.parent.user fileConfig.parent.group fileConfig.parent.mode)
+          (mkDir (parentDirectory volatilePath) fileConfig.parent.user fileConfig.parent.group fileConfig.parent.mode)
+        ]
       ) symlinkedFiles;
-
-      rules =
-        mountedDirRules
-        ++ intermediateDirRules
-        ++ intermediateHomeRules
-        ++ symlinkedDirRules
-        ++ mountedFileRules
-        ++ symlinkedFileRules;
     in
-    rules;
+    mountedDirRules
+    ++ intermediateDirRules
+    ++ intermediateHomeRules
+    ++ intermediatePersistentRules
+    ++ symlinkedDirRules
+    ++ mountedFileRules
+    ++ symlinkedFileRules;
 
-  # creates systemd mount unit configurations from a `preserveAtSubmodule`
-  mkMountUnits =
-    forInitrd: preserveAt: stateConfig:
+  # produces finit `run [S]` lines for bind-mounting inInitrd=false paths in the regular (stage-2) system.
+  # runs in the S phase; mkdir -p ensures directories exist regardless of bootmisc timing.
+  mkFinitRegularMountRuns =
+    _preserveAt: stateConfig:
     let
       allDirectories = getAllDirectories stateConfig;
       allFiles = getAllFiles stateConfig;
-      mountedDirectories = onlyBindMounts forInitrd allDirectories;
-      mountedFiles = onlyBindMounts forInitrd allFiles;
+      mountedDirectories = onlyBindMounts false allDirectories;
+      mountedFiles = onlyBindMounts false allFiles;
 
-      prefix = if forInitrd then "/sysroot" else "/";
+      dirRuns = lib.concatMap (
+        dirConfig:
+        let
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath dirConfig.directory ];
+          volatilePath = dirConfig.directory;
+        in
+        [
+          "run [S] mkdir -p ${persistentPath}"
+          "run [S] mkdir -p ${volatilePath}"
+          "run [S] mount --bind ${persistentPath} ${volatilePath}"
+        ]
+      ) mountedDirectories;
 
-      directoryMounts = map (directoryConfig: {
-        options = toOptionsString (
-          directoryConfig.mountOptions
-          ++ (lib.optional forInitrd {
-            name = "x-initrd.mount";
-            value = null;
-          })
-        );
-        where = concatPaths [
-          prefix
-          directoryConfig.directory
-        ];
-        what = concatPaths [
-          prefix
-          stateConfig.persistentStoragePath
-          directoryConfig.directory
-        ];
-        unitConfig.DefaultDependencies = "no";
-        conflicts = [ "umount.target" ];
-        wantedBy =
-          if forInitrd then
-            [
-              "initrd-preservation.target"
-            ]
-          else
-            [
-              "preservation.target"
-            ];
-        before =
-          if forInitrd then
-            [
-              # directory mounts are set up before tmpfiles
-              "systemd-tmpfiles-setup-sysroot.service"
-              "initrd-preservation.target"
-            ]
-          else
-            [
-              "systemd-tmpfiles-setup.service"
-              "preservation.target"
-            ];
-      }) mountedDirectories;
-
-      fileMounts = map (fileConfig: {
-        options = toOptionsString (
-          fileConfig.mountOptions
-          ++ (lib.optional forInitrd {
-            name = "x-initrd.mount";
-            value = null;
-          })
-        );
-        where = concatPaths [
-          prefix
-          fileConfig.file
-        ];
-        what = concatPaths [
-          prefix
-          stateConfig.persistentStoragePath
-          fileConfig.file
-        ];
-        unitConfig = {
-          DefaultDependencies = "no";
-          ConditionPathExists = concatPaths [
-            prefix
-            stateConfig.persistentStoragePath
-            fileConfig.file
-          ];
-        };
-        conflicts = [ "umount.target" ];
-        after =
-          if forInitrd then
-            [ "systemd-tmpfiles-setup-sysroot.service" ]
-          else
-            [ "systemd-tmpfiles-setup.service" ];
-        wantedBy = if forInitrd then [ "initrd-preservation.target" ] else [ "preservation.target" ];
-        before = if forInitrd then [ "initrd-preservation.target" ] else [ "preservation.target" ];
-      }) mountedFiles;
-
-      mountUnits = directoryMounts ++ fileMounts;
+      fileRuns = lib.concatMap (
+        fileConfig:
+        let
+          persistentPath = concatPaths [ stateConfig.persistentStoragePath fileConfig.file ];
+          volatilePath = fileConfig.file;
+        in
+        [
+          "run [S] mkdir -p ${parentDirectory persistentPath}"
+          "run [S] mkdir -p ${parentDirectory volatilePath}"
+          "run [S] touch ${persistentPath}"
+          "run [S] touch ${volatilePath}"
+          "run [S] mount --bind ${persistentPath} ${volatilePath}"
+        ]
+      ) mountedFiles;
     in
-    mountUnits;
-
-  # aliases to avoid the use of a nameless bool outside this lib
-  mkRegularMountUnits = mkMountUnits false;
-  mkInitrdMountUnits = mkMountUnits true;
-  mkRegularTmpfilesRules = mkTmpfilesRules false;
-  mkInitrdTmpfilesRules = mkTmpfilesRules true;
+    dirRuns ++ fileRuns;
 }

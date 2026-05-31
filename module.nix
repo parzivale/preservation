@@ -1,51 +1,35 @@
-{ config, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   cfg = config.preservation;
 
   inherit (import ./lib.nix { inherit lib; })
-    mkRegularMountUnits
-    mkInitrdMountUnits
-    mkRegularTmpfilesRules
-    mkInitrdTmpfilesRules
+    mkFinitInitrdMountCmds
     ;
+
+  allCmds = lib.flatten (lib.mapAttrsToList mkFinitInitrdMountCmds cfg.preserveAt);
+  script = pkgs.writeScript "preservation-initrd" ''
+    #!/bin/sh
+    ${lib.concatStringsSep "\n" allCmds}
+  '';
 in
 {
   imports = [
     ./options.nix
   ];
 
-  config = lib.mkIf cfg.enable {
-    assertions = [
+  config = lib.mkIf (cfg.enable && allCmds != [ ]) {
+    boot.initrd.contents = [
       {
-        assertion = config.boot.initrd.systemd.enable;
-        message = "This module cannot be used with scripted initrd.";
+        target = "/usr/local/bin/preservation";
+        source = script;
+      }
+      {
+        target = "/etc/finit.d/preservation.conf";
+        source = pkgs.writeText "preservation-finit-initrd.conf" ''
+          run [S] name:preservation <task/mount-all/success> preservation
+        '';
       }
     ];
-
-    boot.initrd.systemd = {
-      targets.initrd-preservation = {
-        description = "Initrd Preservation Mounts";
-        before = [ "initrd.target" ];
-        wantedBy = [ "initrd.target" ];
-      };
-      tmpfiles.settings.preservation = lib.mkMerge (
-        lib.flatten (lib.mapAttrsToList mkInitrdTmpfilesRules cfg.preserveAt)
-      );
-      mounts = lib.flatten (lib.mapAttrsToList mkInitrdMountUnits cfg.preserveAt);
-    };
-
-    systemd = {
-      targets.preservation = {
-        description = "Preservation Mounts";
-        before = [ "sysinit.target" ];
-        wantedBy = [ "sysinit.target" ];
-      };
-      tmpfiles.settings.preservation = lib.mkMerge (
-        lib.flatten (lib.mapAttrsToList mkRegularTmpfilesRules cfg.preserveAt)
-      );
-      mounts = lib.flatten (lib.mapAttrsToList mkRegularMountUnits cfg.preserveAt);
-    };
-
   };
 }
