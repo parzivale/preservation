@@ -18,10 +18,8 @@ jobs:
 
       - name: flake-check --no-build
         run: nix flake check --log-format raw-with-logs --no-build ./tests
-      - name: default test
-        run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.default
-      - name: firstboot test
-        run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.firstboot
+      - name: finit test
+        run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.finit
 
 env:
   FORCE_COLOR: 1
