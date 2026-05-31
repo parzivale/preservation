@@ -7,18 +7,19 @@
     finix-flake.url = "github:parzivale/finix-flake";
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake
-    {inherit inputs;}
-    {
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-      perSystem = {pkgs, ...}: {
-        checks = {
-          finit = inputs.finix-flake.lib.mkTest ({inherit pkgs;} // (import ./finit.nix pkgs));
+      perSystem =
+        { pkgs, ... }:
+        {
+          checks = {
+            finit = inputs.finix-flake.lib.mkTest ({ inherit pkgs; } // (import ./finit.nix pkgs));
+          };
         };
-      };
     };
 }
