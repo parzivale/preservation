@@ -1,0 +1,1122 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Configuration Options - Preservation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Preservation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/nix-community/preservation" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/nix-community/preservation/edit/main/docs/src/configuration-options.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="preservationenable"><a class="header" href="#preservationenable">preservation.enable</a></h2>
+<p>Whether to enable the preservation module.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Example:</em>
+<code>true</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveat"><a class="header" href="#preservationpreserveat">preservation.preserveAt</a></h2>
+<p>Specify a set of locations and the corresponding state that
+should be preserved there.</p>
+<p><em>Type:</em>
+attribute set of (submodule)</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code class="language-nix">{
+  "/state" = {
+    directories = [ "/var/lib/someservice" ];
+    files = [
+      {
+        file = "/etc/wpa_supplicant.conf";
+        how = "symlink";
+      }
+      {
+        file = "/etc/machine-id";
+        inInitrd = true;
+      }
+    ];
+    users = {
+      alice.directories = [ ".rabbit_hole" ];
+      butz = {
+        files = [
+          {
+            file = ".config/foo";
+            mode = "0600";
+          }
+          "bar"
+        ];
+        directories = [ "unshaved_yaks" ];
+      };
+    };
+  };
+}
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathcommonmountoptions"><a class="header" href="#preservationpreserveatpathcommonmountoptions">preservation.preserveAt.&lt;path&gt;.commonMountOptions</a></h2>
+<p>Specify a list of mount options that should be added to all files and directories
+under this preservation prefix, for which <code>how</code> is set to <code>bindmount</code>.</p>
+<p>See also <code>commonMountOptions</code> under <code>users</code> and the invdividual
+<code>mountOptions</code> that is available per file / directory.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code>[
+  "x-gvfs-hide"
+  "x-gdu.hide"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathcommonmountoptionsname"><a class="header" href="#preservationpreserveatpathcommonmountoptionsname">preservation.preserveAt.&lt;path&gt;.commonMountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathcommonmountoptionsvalue"><a class="header" href="#preservationpreserveatpathcommonmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.commonMountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectories"><a class="header" href="#preservationpreserveatpathdirectories">preservation.preserveAt.&lt;path&gt;.directories</a></h2>
+<p>Specify a list of directories that should be preserved.
+The paths are interpreted as absolute paths.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code>[
+  "/var/lib/someservice"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesconfigureparent"><a class="header" href="#preservationpreserveatpathdirectoriesconfigureparent">preservation.preserveAt.&lt;path&gt;.directories.*.configureParent</a></h2>
+<p>Specify whether the parent directory of this directory shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent directories are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>how</code> is set to <code>symlink</code> and
+<code>user</code> is not <code>root</code>.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriescreatelinktarget"><a class="header" href="#preservationpreserveatpathdirectoriescreatelinktarget">preservation.preserveAt.&lt;path&gt;.directories.*.createLinkTarget</a></h2>
+<p>Only used when <code>how</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty directory with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesdirectory"><a class="header" href="#preservationpreserveatpathdirectoriesdirectory">preservation.preserveAt.&lt;path&gt;.directories.*.directory</a></h2>
+<p>Specify the path to the directory that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesgroup"><a class="header" href="#preservationpreserveatpathdirectoriesgroup">preservation.preserveAt.&lt;path&gt;.directories.*.group</a></h2>
+<p>Specify the group that owns the directory.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectorieshow"><a class="header" href="#preservationpreserveatpathdirectorieshow">preservation.preserveAt.&lt;path&gt;.directories.*.how</a></h2>
+<p>Specify how this directory should be preserved.</p>
+<ol>
+<li>
+<p>Either a directory is created both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesmode"><a class="header" href="#preservationpreserveatpathdirectoriesmode">preservation.preserveAt.&lt;path&gt;.directories.*.mode</a></h2>
+<p>Specify the access mode of the directory.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesmountoptions"><a class="header" href="#preservationpreserveatpathdirectoriesmountoptions">preservation.preserveAt.&lt;path&gt;.directories.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this directory.
+These options are only used when <code>how</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> and <code>X-fstrim.notrim</code> are added,
+use <code>mkForce</code> to override these if needed.
+See also <code>fstrim(8)</code>.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesmountoptionsname"><a class="header" href="#preservationpreserveatpathdirectoriesmountoptionsname">preservation.preserveAt.&lt;path&gt;.directories.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesmountoptionsvalue"><a class="header" href="#preservationpreserveatpathdirectoriesmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.directories.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesparentgroup"><a class="header" href="#preservationpreserveatpathdirectoriesparentgroup">preservation.preserveAt.&lt;path&gt;.directories.*.parent.group</a></h2>
+<p>Specify the group that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesparentmode"><a class="header" href="#preservationpreserveatpathdirectoriesparentmode">preservation.preserveAt.&lt;path&gt;.directories.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent directory of this file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesparentuser"><a class="header" href="#preservationpreserveatpathdirectoriesparentuser">preservation.preserveAt.&lt;path&gt;.directories.*.parent.user</a></h2>
+<p>Specify the user that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathdirectoriesuser"><a class="header" href="#preservationpreserveatpathdirectoriesuser">preservation.preserveAt.&lt;path&gt;.directories.*.user</a></h2>
+<p>Specify the user that owns the directory.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfiles"><a class="header" href="#preservationpreserveatpathfiles">preservation.preserveAt.&lt;path&gt;.files</a></h2>
+<p>Specify a list of files that should be preserved.
+The paths are interpreted as absolute paths.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code class="language-nix">[
+  {
+    file = "/etc/wpa_supplicant.conf";
+    how = "symlink";
+  }
+  {
+    file = "/etc/machine-id";
+    inInitrd = true;
+  }
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesconfigureparent"><a class="header" href="#preservationpreserveatpathfilesconfigureparent">preservation.preserveAt.&lt;path&gt;.files.*.configureParent</a></h2>
+<p>Specify whether the parent directory of this file shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent directories are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>how</code> is set to <code>symlink</code> and
+<code>user</code> is not <code>root</code>.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilescreatelinktarget"><a class="header" href="#preservationpreserveatpathfilescreatelinktarget">preservation.preserveAt.&lt;path&gt;.files.*.createLinkTarget</a></h2>
+<p>Only used when <code>how</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty file with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesfile"><a class="header" href="#preservationpreserveatpathfilesfile">preservation.preserveAt.&lt;path&gt;.files.*.file</a></h2>
+<p>Specify the path to the file that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesgroup"><a class="header" href="#preservationpreserveatpathfilesgroup">preservation.preserveAt.&lt;path&gt;.files.*.group</a></h2>
+<p>Specify the group that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfileshow"><a class="header" href="#preservationpreserveatpathfileshow">preservation.preserveAt.&lt;path&gt;.files.*.how</a></h2>
+<p>Specify how this file should be preserved:</p>
+<ol>
+<li>
+<p>Either a file is placed both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesininitrd"><a class="header" href="#preservationpreserveatpathfilesininitrd">preservation.preserveAt.&lt;path&gt;.files.*.inInitrd</a></h2>
+<p>Whether to prepare preservation of this file in the initrd.</p>
+<p><strong>Note:</strong> For most files there is no need to enable this option.</p>
+<p><code>/etc/machine-id</code> is an exception because it needs to
+be populated/read very early.</p>
+<p><strong>Important:</strong> Note that both owner and group for this file need to be
+available in the initrd for permissions to be set correctly.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesmode"><a class="header" href="#preservationpreserveatpathfilesmode">preservation.preserveAt.&lt;path&gt;.files.*.mode</a></h2>
+<p>Specify the access mode of the file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0644"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesmountoptions"><a class="header" href="#preservationpreserveatpathfilesmountoptions">preservation.preserveAt.&lt;path&gt;.files.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this file.
+These options are only used when <code>how</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> is added,
+use <code>mkForce</code> to override this if needed.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesmountoptionsname"><a class="header" href="#preservationpreserveatpathfilesmountoptionsname">preservation.preserveAt.&lt;path&gt;.files.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesmountoptionsvalue"><a class="header" href="#preservationpreserveatpathfilesmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.files.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesparentgroup"><a class="header" href="#preservationpreserveatpathfilesparentgroup">preservation.preserveAt.&lt;path&gt;.files.*.parent.group</a></h2>
+<p>Specify the group that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesparentmode"><a class="header" href="#preservationpreserveatpathfilesparentmode">preservation.preserveAt.&lt;path&gt;.files.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent directory of this file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesparentuser"><a class="header" href="#preservationpreserveatpathfilesparentuser">preservation.preserveAt.&lt;path&gt;.files.*.parent.user</a></h2>
+<p>Specify the user that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathfilesuser"><a class="header" href="#preservationpreserveatpathfilesuser">preservation.preserveAt.&lt;path&gt;.files.*.user</a></h2>
+<p>Specify the user that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathpersistentstoragepath"><a class="header" href="#preservationpreserveatpathpersistentstoragepath">preservation.preserveAt.&lt;path&gt;.persistentStoragePath</a></h2>
+<p>Specify the location at which the <code>directories</code>, <code>files</code>,
+<code>users.directories</code> and <code>users.files</code> should be preserved.
+Defaults to the name of the parent attribute set.</p>
+<p><em>Type:</em>
+path</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusers"><a class="header" href="#preservationpreserveatpathusers">preservation.preserveAt.&lt;path&gt;.users</a></h2>
+<p>Specify a set of users with corresponding files and directories that
+should be preserved.</p>
+<p><em>Type:</em>
+attribute set of (submodule)</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code class="language-nix">{
+  alice.directories = [ ".rabbit_hole" ];
+  butz = {
+    files = [
+      {
+        file = ".config/foo";
+        mode = "0600";
+      }
+      "bar"
+    ];
+    directories = [ "unshaved_yaks" ];
+  };
+}
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersusercommonmountoptions"><a class="header" href="#preservationpreserveatpathusersusercommonmountoptions">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.commonMountOptions</a></h2>
+<p>Specify a list of mount options that should be added to all files and directories
+of this user, for which <code>how</code> is set to <code>bindmount</code>.</p>
+<p>See also the top level <code>commonMountOptions</code> and the invdividual
+<code>mountOptions</code> that is available per file / directory.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code>[
+  "x-gvfs-hide"
+  "x-gdu.hide"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersusercommonmountoptionsname"><a class="header" href="#preservationpreserveatpathusersusercommonmountoptionsname">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.commonMountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersusercommonmountoptionsvalue"><a class="header" href="#preservationpreserveatpathusersusercommonmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.commonMountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectories"><a class="header" href="#preservationpreserveatpathusersuserdirectories">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories</a></h2>
+<p>Specify a list of directories that should be preserved for this user.
+The paths are interpreted relative to <code>home</code>.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code>[
+  ".rabbit_hole"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesconfigureparent"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesconfigureparent">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.configureParent</a></h2>
+<p>Specify whether the parent directory of this directory shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent directories are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>how</code> is set to <code>symlink</code> and
+<code>user</code> is not <code>root</code>.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriescreatelinktarget"><a class="header" href="#preservationpreserveatpathusersuserdirectoriescreatelinktarget">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.createLinkTarget</a></h2>
+<p>Only used when <code>how</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty directory with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesdirectory"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesdirectory">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.directory</a></h2>
+<p>Specify the path to the directory that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesgroup"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesgroup">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.group</a></h2>
+<p>Specify the group that owns the directory.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectorieshow"><a class="header" href="#preservationpreserveatpathusersuserdirectorieshow">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.how</a></h2>
+<p>Specify how this directory should be preserved.</p>
+<ol>
+<li>
+<p>Either a directory is created both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesmode"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesmode">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.mode</a></h2>
+<p>Specify the access mode of the directory.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesmountoptions"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesmountoptions">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this directory.
+These options are only used when <code>how</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> and <code>X-fstrim.notrim</code> are added,
+use <code>mkForce</code> to override these if needed.
+See also <code>fstrim(8)</code>.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesmountoptionsname"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesmountoptionsname">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesmountoptionsvalue"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesparentgroup"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesparentgroup">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.parent.group</a></h2>
+<p>Specify the group that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesparentmode"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesparentmode">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent directory of this file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesparentuser"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesparentuser">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.parent.user</a></h2>
+<p>Specify the user that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserdirectoriesuser"><a class="header" href="#preservationpreserveatpathusersuserdirectoriesuser">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.directories.*.user</a></h2>
+<p>Specify the user that owns the directory.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfiles"><a class="header" href="#preservationpreserveatpathusersuserfiles">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files</a></h2>
+<p>Specify a list of files that should be preserved for this user.
+The paths are interpreted relative to <code>home</code>.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code class="language-nix">[
+  {
+    file = ".config/foo";
+    mode = "0600";
+  }
+  "bar"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesconfigureparent"><a class="header" href="#preservationpreserveatpathusersuserfilesconfigureparent">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.configureParent</a></h2>
+<p>Specify whether the parent directory of this file shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent directories are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>how</code> is set to <code>symlink</code> and
+<code>user</code> is not <code>root</code>.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilescreatelinktarget"><a class="header" href="#preservationpreserveatpathusersuserfilescreatelinktarget">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.createLinkTarget</a></h2>
+<p>Only used when <code>how</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty file with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesfile"><a class="header" href="#preservationpreserveatpathusersuserfilesfile">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.file</a></h2>
+<p>Specify the path to the file that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesgroup"><a class="header" href="#preservationpreserveatpathusersuserfilesgroup">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.group</a></h2>
+<p>Specify the group that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfileshow"><a class="header" href="#preservationpreserveatpathusersuserfileshow">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.how</a></h2>
+<p>Specify how this file should be preserved:</p>
+<ol>
+<li>
+<p>Either a file is placed both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesininitrd"><a class="header" href="#preservationpreserveatpathusersuserfilesininitrd">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.inInitrd</a></h2>
+<p>Whether to prepare preservation of this file in the initrd.</p>
+<p><strong>Note:</strong> For most files there is no need to enable this option.</p>
+<p><code>/etc/machine-id</code> is an exception because it needs to
+be populated/read very early.</p>
+<p><strong>Important:</strong> Note that both owner and group for this file need to be
+available in the initrd for permissions to be set correctly.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesmode"><a class="header" href="#preservationpreserveatpathusersuserfilesmode">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.mode</a></h2>
+<p>Specify the access mode of the file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0644"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesmountoptions"><a class="header" href="#preservationpreserveatpathusersuserfilesmountoptions">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this file.
+These options are only used when <code>how</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> is added,
+use <code>mkForce</code> to override this if needed.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesmountoptionsname"><a class="header" href="#preservationpreserveatpathusersuserfilesmountoptionsname">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesmountoptionsvalue"><a class="header" href="#preservationpreserveatpathusersuserfilesmountoptionsvalue">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesparentgroup"><a class="header" href="#preservationpreserveatpathusersuserfilesparentgroup">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.parent.group</a></h2>
+<p>Specify the group that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${defaultOwner}.group"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesparentmode"><a class="header" href="#preservationpreserveatpathusersuserfilesparentmode">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent directory of this file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesparentuser"><a class="header" href="#preservationpreserveatpathusersuserfilesparentuser">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.parent.user</a></h2>
+<p>Specify the user that owns the parent directory of this file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserfilesuser"><a class="header" href="#preservationpreserveatpathusersuserfilesuser">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.files.*.user</a></h2>
+<p>Specify the user that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserhome"><a class="header" href="#preservationpreserveatpathusersuserhome">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.home</a></h2>
+<p>Specify the path to the user’s home directory.</p>
+<p><em>Type:</em>
+path, not containing newlines or colons</p>
+<p><em>Default:</em>
+<code>"config.users.users.\${name}.home"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="preservationpreserveatpathusersuserusername"><a class="header" href="#preservationpreserveatpathusersuserusername">preservation.preserveAt.&lt;path&gt;.users.&lt;user&gt;.username</a></h2>
+<p>Specify the user for which the <code>directories</code> and <code>files</code>
+should be persisted. Defaults to the name of the parent attribute set.</p>
+<p><em>Type:</em>
+string, not containing newlines or colons</p>
+<p><em>Default:</em>
+<code>"‹name›"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/nix-community/preservation/blob/main/options.nix">options.nix</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="examples.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="examples.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

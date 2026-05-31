@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Migration - Preservation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Preservation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/nix-community/preservation" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/nix-community/preservation/edit/main/docs/src/impermanence-migration.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="migration-from-impermanence-to-preservation"><a class="header" href="#migration-from-impermanence-to-preservation">Migration from impermanence to Preservation</a></h1>
+<p>This section lists individual differences between impermanence and
+Preservation, to better understand them in context of a complete configuration
+<a href="./examples.html">Examples</a> may be helpful.</p>
+<p>The following points need to be considered when migrating an existing
+impermanence configuration to Preservation:</p>
+<h3 id="global-enable-switch"><a class="header" href="#global-enable-switch">Global <code>enable</code> switch</a></h3>
+<p>The module must be explicitly enabled by setting <code>preservation.enable</code> to <code>true</code>.</p>
+<h3 id="handling-of-existing-state"><a class="header" href="#handling-of-existing-state">Handling of existing state</a></h3>
+<p>Coming from a setup with impermanence it is important to make sure existing persistent state is preserved
+correctly, meaning the ownership and mode of preservation remains the same. There is no exhaustive list
+of files and directories requiring special treatment but at least the following needs to be considered:</p>
+<p><strong>SSH host keys</strong></p>
+<p>Correct ownership and mode of SSH host keys is very important for sshd to accept connections.
+Getting this wrong, e.g. not restricted enough, may cause your host to become inaccessible via SSH, forcing
+you to use other means of logging into the machine.</p>
+<p>The following config may be used to preserve the RSA and Ed25519 host keys with preservation:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".files = [
+  { file = "/etc/ssh/ssh_host_rsa_key"; how = "symlink"; configureParent = true; }
+  { file = "/etc/ssh/ssh_host_ed25519_key"; how = "symlink"; configureParent = true; }
+];
+</code></pre>
+<p>The above config does not include access modes for the key files because the preservation
+mode is <code>symlink</code> and the link's target is not touched by preservation without an explicit
+<code>createLinkTarget = true</code>.</p>
+<p><strong>Secrets and other files requiring special access modes</strong></p>
+<p>Any files and directories that need to have a mode that differs from the default (<code>0644</code> for files
+and <code>0755</code> for directories) must be configured explicitly to avoid having the default mode applied.</p>
+<h3 id="when-to-persist"><a class="header" href="#when-to-persist">When to persist</a></h3>
+<p>Files and directories that need to be persisted early, must be explicitly configured. For example <code>/etc/machine-id</code>:</p>
+<p>This file needs to be persisted very early, by explicitly setting <code>inInitrd</code> to <code>true</code>:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".files = [
+  { file = "/etc/machine-id"; inInitrd = true; }
+];
+</code></pre>
+<h3 id="how-to-persist"><a class="header" href="#how-to-persist">How to persist</a></h3>
+<p>The mode of preservation must be set explicitly for some files and directories.
+This can be done by setting <code>how</code> to either <code>symlink</code> or <code>bindmount</code> (default).
+For most cases the default is sufficient but sometimes a symlink may be needed,
+for example <code>/var/lib/systemd/random-seed</code>.</p>
+<p>This file is expected to not exist before it is initialized. A symlink can be
+used to cause its creation to happen on the persistent volume:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".files = [
+  {
+    file = "/var/lib/systemd/random-seed";
+    # create a symlink on the volatile volume
+    how = "symlink";
+    # prepare the preservation early during startup
+    inInitrd = true;
+  }
+];
+</code></pre>
+<p>Note that no file is created at the symlink's target, unless <code>createLinkTarget</code> is set to <code>true</code>.</p>
+<h3 id="intermediate-path-components"><a class="header" href="#intermediate-path-components">Intermediate path components</a></h3>
+<p>Any directory that is not preserved itself but is a parent of a preserved file or directory
+is called an intermediate path component here. Regarding the ownership and permissions of these
+intermediate path components, the following needs to be considered.</p>
+<h4 id="intermediate-path-components-of-user-specific-files-and-directories"><a class="header" href="#intermediate-path-components-of-user-specific-files-and-directories">Intermediate path components of user-specific files and directories</a></h4>
+<p>Parent directories of a preserved user-specific file or directory are created with the respective
+user as their owner and permissions <code>0755</code>. This is the case for all intermediate path components
+up to, but not including, the user's home directory.</p>
+<p><strong>Example</strong></p>
+<p>Consider the following preservation config:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".users.alice.directories = [
+  ".local/state/nvim"
+];
+</code></pre>
+<p>This config will cause preservation to configure a bind-mount for the subdirectory <code>nvim</code>, causing its
+contents to be preserved. The intermediate path components <code>.local</code> and <code>state</code> will be created if
+necessary, but their contents are not preserved. Owner is set to <code>alice</code>, group to alice's primary
+group, i.e. <code>users.users.alice.group</code> and the mode is set to <code>0755</code>.</p>
+<h4 id="intermediate-path-components-of-system-wide-files-and-directories"><a class="header" href="#intermediate-path-components-of-system-wide-files-and-directories">Intermediate path components of system-wide files and directories</a></h4>
+<p>For system-wide files and directories, missing components of a preserved path that do not already exist,
+are created by systemd-tmpfiles with default ownership <code>root:root</code> and mode <code>0755</code>.</p>
+<p>Should such directories require different ownership or mode, the intended way to create and configure them
+is via systemd-tmpfiles directly.</p>
+<p><strong>Example</strong></p>
+<p>Consider a preserved file <code>/foo/bar/baz</code>:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".files = [
+  { file = "/foo/bar/baz"; user = "baz"; group = "baz"; };
+];
+</code></pre>
+<p>This would create the file with desired ownership on both the volatile and persistent volumes.
+However, the parent directories that did not exist before, i.e. <code>/foo</code> and <code>/foo/bar</code>, are
+created with ownership <code>root:root</code> and mode <code>0755</code>.</p>
+<p>Preservations allows the configuration of immediate parents, so the permissions for <code>/foo/bar</code>
+can be configured:</p>
+<pre><code class="language-nix">preservation.preserveAt."/persistent".files = [
+  {
+    file = "/foo/bar/baz"; user = "baz"; group = "baz";
+    configureParent = true;
+    parent.user = "baz";
+    parent.group = "bar";
+  };
+];
+</code></pre>
+<p>Now the parent directory <code>/foo/bar</code> is configured with ownership <code>baz:bar</code>. But the first
+path component <code>/foo</code> still has systemd-tmpfiles' default ownership and the configuration
+becomes quite convoluted.</p>
+<p><strong>Solution</strong></p>
+<p>To create or configure intermediate path components of a persisted path, systemd-tmpfiles
+may be used directly:</p>
+<pre><code class="language-nix"># configure preservation of single file
+preservation.preserveAt."/persistent".files = [
+  { file = "/foo/bar/baz"; user = "baz"; group = "bar"; };
+];
+
+# create and configure parents of preserved file on the volatile volume with custom permissions
+# The Preservation module also uses `settings.preservation` here.
+systemd.tmpfiles.settings.preservation = {
+  "/foo".d = { user = "foo"; group = "bar"; mode = "0775"; };
+  "/foo/bar".d = { user = "bar"; group = "bar"; mode = "0755"; };
+};
+</code></pre>
+<p>See <a href="https://www.freedesktop.org/software/systemd/man/latest/tmpfiles.d.html">tmpfiles.d(5)</a>
+for available configuration options.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="impermanence-comparison.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="library-and-testing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="impermanence-comparison.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="library-and-testing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
