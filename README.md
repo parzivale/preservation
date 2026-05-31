@@ -6,7 +6,7 @@ Inspired and heavily influenced by [impermanence](https://github.com/nix-communi
 
 ## Documentation
 
-Docs are available at <https://nix-community.github.io/preservation>
+Docs are available at <https://parzivale.github.io/preservation>
 
 ## Prerequisites
 
