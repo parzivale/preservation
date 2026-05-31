@@ -1,9 +1,13 @@
-{ config, pkgs, lib, ... }:
-
-let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
   cfg = config.preservation;
 
-  inherit (import ./lib.nix { inherit lib; })
+  inherit
+    (import ./lib.nix {inherit lib;})
     mkFinitInitrdMountCmds
     ;
 
@@ -12,13 +16,12 @@ let
     #!/bin/sh
     ${lib.concatStringsSep "\n" allCmds}
   '';
-in
-{
+in {
   imports = [
     ./options.nix
   ];
 
-  config = lib.mkIf (cfg.enable && allCmds != [ ]) {
+  config = lib.mkIf (cfg.enable && allCmds != []) {
     boot.initrd.contents = [
       {
         target = "/usr/local/bin/preservation";
