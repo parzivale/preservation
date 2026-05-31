@@ -1,9 +1,8 @@
 # Preservation
 
-Nix tooling to enable declarative management of non-volatile system state.
+Declarative management of non-volatile system state for [finix](https://github.com/finix-community/finix).
 
-Inspired and heavily influenced by [impermanence](https://github.com/nix-community/impermanence) but not
-meant to be a drop-in replacement.
+Inspired and heavily influenced by [impermanence](https://github.com/nix-community/impermanence), but not meant to be a drop-in replacement. Unlike impermanence, preservation does not rely on interpreters, making it suitable for finix systems that use [finit](https://github.com/troglobit/finit) as PID 1.
 
 ## Documentation
 
@@ -15,9 +14,7 @@ Requires at least nixos-24.11
 
 ## Why?
 
-This aims to provide a declarative state management solution for NixOS systems without resorting to
-interpreters to do the heavy lifting. This should enable impermanence-like state management on
-an "interpreter-less" NixOS system.
+finix explores the NixOS design space using finit as PID 1, which means init-time tooling must work without scripting interpreters. Preservation provides impermanence-style declarative state management as a pure Nix solution — no shell, no Python, no runtime dependencies beyond what finix already provides.
 
 Related:
 - <https://github.com/NixOS/nixpkgs/issues/265640>
