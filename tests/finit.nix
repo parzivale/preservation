@@ -1,11 +1,11 @@
-pkgs: let
+pkgs: modules: let
   inherit (pkgs) lib;
   preservationLib = import ../lib.nix {inherit lib;};
 in {
   name = "preservation-finit";
 
   nodes.machine = {pkgs, ...}: {
-    imports = [../module.nix];
+    imports = [../module.nix] ++ modules;
 
     preservation = {
       enable = true;

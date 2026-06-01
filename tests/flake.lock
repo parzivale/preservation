@@ -38,11 +38,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1780273290,
-        "narHash": "sha256-07/tObX8nFKG21Zl0BkC7D2u/oiDijTMNqPW+rkFpKg=",
+        "lastModified": 1780279117,
+        "narHash": "sha256-ggnl9Uo260IxNVbq7JitraqBqfDoPCazrIbLb6DLF9A=",
         "owner": "parzivale",
         "repo": "finix-flake",
-        "rev": "52278bfefed5813195f8e39f38719c540c14e689",
+        "rev": "b6c3e59cae435cbcc305e5f5d61599871555ab7e",
         "type": "github"
       },
       "original": {

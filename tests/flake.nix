@@ -13,9 +13,15 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
-      perSystem = {pkgs, ...}: {
+      perSystem = {
+        pkgs,
+        lib,
+        ...
+      }: let
+        modules = with inputs.finix-flake.finixModules; [ifupdown-ng sysklogd];
+      in {
         checks = {
-          finit = inputs.finix-flake.lib.mkTest ({inherit pkgs;} // (import ./finit.nix pkgs));
+          finit = inputs.finix-flake.lib.mkTest ({inherit pkgs;} // (import ./finit.nix pkgs modules));
         };
       };
     };
