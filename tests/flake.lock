@@ -15,18 +15,34 @@
         "type": "github"
       }
     },
+    "finix-community-modules": {
+      "locked": {
+        "lastModified": 1780082353,
+        "narHash": "sha256-4oj5vGnopoC9x8DRRfjtiqxfTEfYuqcNq2OzkgBf75Q=",
+        "owner": "finix-community",
+        "repo": "community-modules",
+        "rev": "8ba71a324b0689373873d197f2f025242bb1af44",
+        "type": "github"
+      },
+      "original": {
+        "owner": "finix-community",
+        "repo": "community-modules",
+        "type": "github"
+      }
+    },
     "finix-flake": {
       "inputs": {
         "finix": "finix",
+        "finix-community-modules": "finix-community-modules",
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1780252868,
-        "narHash": "sha256-5dTHOLkFeQFj3u+UiE1ic8G5A3M/wk0xdasgVK1QdLM=",
+        "lastModified": 1780273290,
+        "narHash": "sha256-07/tObX8nFKG21Zl0BkC7D2u/oiDijTMNqPW+rkFpKg=",
         "owner": "parzivale",
         "repo": "finix-flake",
-        "rev": "55c434bd3f8ac5c6ac9059475b2f9062c718e866",
+        "rev": "52278bfefed5813195f8e39f38719c540c14e689",
         "type": "github"
       },
       "original": {
