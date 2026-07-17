@@ -16,6 +16,9 @@ let
     #!/bin/sh
     ${lib.concatStringsSep "\n" allCmds}
   '';
+  conditions = map (n: "task/${n}/success")
+    (lib.attrNames (lib.filterAttrs (n: _: lib.hasPrefix "mount-" n) config.boot.initrd.finit.tasks));
+  conditionString = lib.optionalString (conditions != [ ]) " <${lib.concatStringsSep "," conditions}>";
 in
 {
   imports = [
@@ -31,7 +34,7 @@ in
       {
         target = "/etc/finit.d/preservation.conf";
         source = pkgs.writeText "preservation-finit-initrd.conf" ''
-          run [S] name:preservation <task/mount-all/success> preservation
+          run [S] name:preservation${conditionString} preservation
         '';
       }
     ];
